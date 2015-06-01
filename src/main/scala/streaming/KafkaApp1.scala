@@ -23,8 +23,6 @@ object KafkaApp1 {
     val events = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics).map(_._2)
 
 
-    val rawFeildCount = events.map(l => l.split('\t').length).print(50)
-
     val logLineByEdgeNodes = events.map(l => {
 
       val fields = l.split('\t')
@@ -36,9 +34,13 @@ object KafkaApp1 {
     logLineByEdgeNodes.print(50)
 
 
-
-
-    //stream.count().print()
+    // Total content size of HIT and MISS
+    events.filter(l => l.split('\t').length >= 17).map(l => {
+      val fields = l.split('\t')
+      val hit = fields(7).toLong
+      val missed = if ("MISS".equals(fields(12))) hit else 0L
+      (hit, missed)
+    }).reduce( {case ((x,y),(a,b)) => (x+y, a+b)} ).print()
 
     ssc.start()
     ssc.awaitTermination()
