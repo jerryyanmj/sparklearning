@@ -13,7 +13,7 @@ object KafkaApp1 {
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setMaster("local[2]").setAppName("Kafka Integration Test")
-    val ssc = new StreamingContext(conf, Seconds(5))
+    val ssc = new StreamingContext(conf, Seconds(10))
 
     // Connecting to Kafka queue for Gemini 71.74.186.212:9092
     val kafkaParams = Map("metadata.broker.list" -> "localhost:9002")
