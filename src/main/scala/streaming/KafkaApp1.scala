@@ -33,12 +33,20 @@ object KafkaApp1 {
 
     val parsedEvents = events map (gr => new GeminiParsed(gr))
 
-    val logLineByEdgeNodesParsed = parsedEvents.map(l => (l.sDns, 1)).reduceByKey((x,y) => x + y)
+    val logLineByEdgeNodesParsed = parsedEvents.map(l => (l.sDns.get, 1)).reduceByKey((x,y) => x + y)
     logLineByEdgeNodesParsed.print(50)
 
-    val eventTypeCount = parsedEvents map (l => (l.eventType map _, 1)) reduceByKey((x,y) => x+y)
+    val eventTypeCount = parsedEvents map (l => (l.eventType.get, 1)) reduceByKey((x,y) => x+y)
     eventTypeCount.print(50)
 
+    val cacheStatusCount = parsedEvents map (l => (l.cacheDeliveryType.get, 1)) reduceByKey((x,y) => x+y)
+    cacheStatusCount.print(50)
+
+    val httpStatusCount = parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKey((x,y) => x+y)
+    httpStatusCount.print(50)
+
+    val contentSize = parsedEvents map (l => (l.cacheDeliveryType.get, l.contentSize.getOrElse(0L))) reduceByKey((x,y) => x+y)
+    contentSize.print(50)
 
 //    val splittedRdd = events.map(rdd => rdd.split('\t'))
 //
@@ -55,15 +63,6 @@ object KafkaApp1 {
 //    fullLogSample.print(5)
 
 
-//
-//
-//    // Total content size of HIT and MISS
-//    events.filter(l => l.split('\t').length >= 17).map(l => {
-//      val fields = l.split('\t')
-//      val hit = fields(7).toLong
-//      val missed = if ("MISS".equals(fields(12))) hit else 0L
-//      (hit, missed)
-//    }).reduce( {case ((x,y),(a,b)) => (x+y, a+b)} ).print()
 
     ssc.start()
     ssc.awaitTermination()

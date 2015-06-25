@@ -89,7 +89,8 @@ class GeminiParsed(rawLog: GeminiRaw) {
     def isTextChunk(s: String) = s.toLowerCase.contains("Fragments(textstream".toLowerCase) ||
       s.toLowerCase.contains("FragmentInfo(textstream".toLowerCase)
 
-    def isManifestChunk(s: String) = s.toLowerCase.contains("isml/Manifest".toLowerCase) ||
+    def isManifestChunk(s: String) = s.toLowerCase.contains(".isml".toLowerCase) ||
+      s.toLowerCase.contains("isml/Manifest".toLowerCase) ||
       s.toLowerCase.contains("ism/Manifest".toLowerCase)
 
     def isManifest(s: String) = s.toLowerCase.contains(".m3u8")
@@ -138,7 +139,7 @@ class GeminiParsed(rawLog: GeminiRaw) {
 
   }
 
-  def httpStatusCode = parseIntRawValue(x => x.toInt)(raw.s_cache_status)
+  def httpStatusCode = parseIntRawValue(x => x.toInt)(raw.sc_status)
 
   def userAgent = parseRawValue(raw.cs_user_agent)
 
@@ -175,7 +176,7 @@ class GeminiParsed(rawLog: GeminiRaw) {
   def chunkSeq = ???
 
   def sDns = parseRawValue(raw.c_info) match {
-    case Some(s) => s.substring(s.indexOf("nginx-access: ") + "nginx-access: ".length)
+    case Some(s) => Some(s.substring(s.indexOf("nginx-access: ") + "nginx-access: ".length))
     case _ => None
   }
 
