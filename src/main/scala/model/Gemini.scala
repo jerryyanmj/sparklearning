@@ -10,7 +10,6 @@ import org.joda.time.format._
  */
 
 class GeminiRaw(args: Array[String]) {
-
   val Array(c_info, dynamic_ip, c_ip, date_string, cs_method, cs_referrer, sc_status, sc_stream_bytes, sc_bytes, cs_uri, cs_user_agent, x_duration, s_cache_status, event_type, unix_time, http_range, cs_cookie, download_speed) = args
 }
 
