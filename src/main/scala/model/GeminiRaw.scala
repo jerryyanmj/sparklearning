@@ -8,11 +8,14 @@ import org.joda.time.format._
 /**
  * Created by jiarui.yan on 5/31/15.
  */
-
-class GeminiRaw(args: Array[String]) {
-
+abstract class GeminiRaw
+case class GeminiRawRegular(args: Array[String]) extends GeminiRaw {
   val Array(c_info, dynamic_ip, c_ip, date_string, cs_method, cs_referrer, sc_status, sc_stream_bytes, sc_bytes, cs_uri, cs_user_agent, x_duration, s_cache_status, event_type, unix_time, http_range, cs_cookie, download_speed) = args
 }
+case class GeminiRawMiddleTier(args: Array[String]) extends GeminiRaw {
+  val Array(c_info, c_ip, date_string, cs_method, sc_status, sc_stream_bytes, cs_uri, cs_user_agent, x_duration, s_cache_status) = args
+}
+case class GeminiRawUnknown(logLine: String) extends GeminiRaw
 
 class GeminiRawDecoder(props: VerifiableProperties = null) extends Decoder[GeminiRaw] {
   val encoding =
@@ -23,11 +26,15 @@ class GeminiRawDecoder(props: VerifiableProperties = null) extends Decoder[Gemin
 
   def fromBytes(bytes: Array[Byte]): GeminiRaw = {
     val logLine = new String(bytes, encoding)
-    new GeminiRaw(logLine.split('\t'))
+    val logLineArr = logLine.split('\t')
+    if (logLineArr.length == 18) GeminiRawRegular(logLineArr.take(18))
+    else if (logLineArr.length == 10) GeminiRawMiddleTier(logLineArr.take(10))
+    else GeminiRawUnknown(logLine)
   }
 }
 
-class GeminiParsed(rawLog: GeminiRaw) {
+abstract class ParsedGemini
+case class ParsedGeminiRegular(rawLog: GeminiRawRegular) extends ParsedGemini{
   val raw = rawLog
 
   def parseRawValue(s: String) = Option(s).filter(x => !x.equals("-") && !x.equals("\"-\""))
