@@ -1,7 +1,7 @@
 package streaming
 
 import kafka.serializer.StringDecoder
-import model.{GeminiParsed, GeminiRawDecoder, GeminiRaw}
+import model._
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -32,33 +32,26 @@ object KafkaApp1 {
     val strEventStream = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topics).map(_._2)
 
     val splittedRdd = strEventStream.map(rdd => rdd.split('\t'))
-    val fullPartialLogCount = splittedRdd.map(lArr => (lArr.length, 1)).reduceByKey((x, y) => x + y)
-    fullPartialLogCount.print(50)
-    val partialLogSample = splittedRdd.filter(lArr => lArr.length < 15).map(lArr => lArr.mkString("|"))
-    partialLogSample.print(5)
-    val fullLogSample = splittedRdd.filter(lArr => lArr.length > 15).map(lArr => lArr.mkString("|"))
-    fullLogSample.print(5)
+
+    splittedRdd.map(lArr => (lArr.length, 1)).reduceByKey((x, y) => x + y) print(50)
+    //splittedRdd.filter(lArr => lArr.length < 15).map(lArr => lArr.mkString("|")) print(5)
+    //splittedRdd.filter(lArr => lArr.length > 15).map(lArr => lArr.mkString("|")) print(5)
 
     //val decodedEvents = KafkaUtils.createDirectStream[String, GeminiRaw, StringDecoder, GeminiRawDecoder](ssc, kafkaParams, topics).map(_._2)
 
     val regularEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 18)
-
     val parsedEvents = regularEvent map (lArr => new GeminiRaw(lArr)) map (gr => new GeminiParsed(gr))
 
-    val logLineByEdgeNodesParsed = parsedEvents.map(l => (l.sDns.get, 1)).reduceByKey((x,y) => x + y)
-    logLineByEdgeNodesParsed.print(50)
+    parsedEvents.map(l => (l.sDns.get, 1)) reduceByKey((x,y) => x + y) print(50)
+    parsedEvents map (l => (l.eventType.get, 1)) reduceByKey((x,y) => x+y) print(50)
+    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), 1)) reduceByKey((x,y) => x+y) print(50)
+    parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKey((x,y) => x+y) print(50)
+    parsedEvents map (l => (l.cacheDeliveryType.get, l.contentSize.getOrElse(0L))) reduceByKey((x,y) => x+y) print(50)
 
-    val eventTypeCount = parsedEvents map (l => (l.eventType.get, 1)) reduceByKey((x,y) => x+y)
-    eventTypeCount.print(50)
+    val midTierEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 10)
+    val parsedMidTierEvents = midTierEvent map (lArr => new GeminiRawMiddleTier(lArr)) map (l => new GeminiParsedMiddleTier(l))
 
-    val cacheStatusCount = parsedEvents map (l => (l.cacheDeliveryType.get, 1)) reduceByKey((x,y) => x+y)
-    cacheStatusCount.print(50)
-
-    val httpStatusCount = parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKey((x,y) => x+y)
-    httpStatusCount.print(50)
-
-    val contentSize = parsedEvents map (l => (l.cacheDeliveryType.get, l.contentSize.getOrElse(0L))) reduceByKey((x,y) => x+y)
-    contentSize.print(50)
+    parsedMidTierEvents.filter(l => l.csMethod.contains("CNN") && l.csMethod.contains(".ts")) map (l => (l.csMethod, 1)) reduceByKey((x,y) => x + y) print(50)
 
     ssc.start()
     ssc.awaitTermination()

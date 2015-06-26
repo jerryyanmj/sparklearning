@@ -9,7 +9,7 @@ import org.joda.time.format._
  * Created by jiarui.yan on 5/31/15.
  */
 
-class GeminiRaw(args: Array[String]) {
+class GeminiRaw(args: Array[String]) extends Serializable {
   val Array(c_info, dynamic_ip, c_ip, date_string, cs_method, cs_referrer, sc_status, sc_stream_bytes, sc_bytes, cs_uri, cs_user_agent, x_duration, s_cache_status, event_type, unix_time, http_range, cs_cookie, download_speed) = args
 }
 
@@ -26,7 +26,17 @@ class GeminiRawDecoder(props: VerifiableProperties = null) extends Decoder[Gemin
   }
 }
 
-class GeminiParsed(rawLog: GeminiRaw) {
+class GeminiRawMiddleTier(args: Array[String]) extends Serializable {
+  val Array(c_info, c_ip, date_string, cs_method, sc_status, sc_stream_bytes, cs_uri, cs_user_agent, x_duration, s_cache_status) = args
+}
+
+class GeminiParsedMiddleTier(rawLog: GeminiRawMiddleTier) extends Serializable {
+  val raw = rawLog
+
+  def csMethod = raw.cs_method
+}
+
+class GeminiParsed(rawLog: GeminiRaw) extends Serializable {
   val raw = rawLog
 
   def parseRawValue(s: String) = Option(s).filter(x => !x.equals("-") && !x.equals("\"-\""))
@@ -134,8 +144,6 @@ class GeminiParsed(rawLog: GeminiRaw) {
         }
       )
     }
-
-
   }
 
   def httpStatusCode = parseIntRawValue(x => x.toInt)(raw.sc_status)
