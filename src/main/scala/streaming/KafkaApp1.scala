@@ -42,16 +42,16 @@ object KafkaApp1 {
     val regularEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 18)
     val parsedEvents = regularEvent map (lArr => new GeminiRaw(lArr)) map (gr => new GeminiParsed(gr))
 
-    parsedEvents.map(l => (l.sDns.get, 1)) reduceByKey((x,y) => x + y) print(50)
-    parsedEvents map (l => (l.eventType.get, 1)) reduceByKey((x,y) => x+y) print(50)
-    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), 1)) reduceByKey((x,y) => x+y) print(50)
-    parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKey((x,y) => x+y) print(50)
-    parsedEvents map (l => (l.cacheDeliveryType.get, l.contentSize.getOrElse(0L))) reduceByKey((x,y) => x+y) print(50)
+    parsedEvents.map(l => (l.sDns.get, 1)) reduceByKeyAndWindow ((x:Int,y:Int) => (x + y), Seconds(30), Seconds(10)) print(50)
+    parsedEvents map (l => (l.eventType.get, 1)) reduceByKeyAndWindow ((x:Int,y:Int) => (x + y), Seconds(30), Seconds(10)) print(50)
+    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), 1)) reduceByKeyAndWindow ((x:Int,y:Int) => (x + y), Seconds(30), Seconds(10)) print(50)
+    parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKeyAndWindow ((x:Int,y:Int) => (x + y), Seconds(30), Seconds(10)) print(50)
+    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), l.contentSize.getOrElse(0L))) reduceByKeyAndWindow ((x:Long,y:Long) => (x + y), Seconds(30), Seconds(10)) print(50)
 
     val midTierEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 10)
     val parsedMidTierEvents = midTierEvent map (lArr => new GeminiRawMiddleTier(lArr)) map (l => new GeminiParsedMiddleTier(l))
 
-    parsedMidTierEvents.filter(l => l.csMethod.contains("CNN") && l.csMethod.contains(".ts")) map (l => (l.csMethod, 1)) reduceByKey((x,y) => x + y) print(50)
+    parsedMidTierEvents.filter(l => l.csMethod.contains("CNN") && l.csMethod.contains(".ts")) map (l => (l.csMethod, 1)) reduceByKeyAndWindow ((x:Int,y:Int) => (x + y), Seconds(30), Seconds(10)) print(50)
 
     ssc.start()
     ssc.awaitTermination()
