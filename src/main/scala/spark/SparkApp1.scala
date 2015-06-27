@@ -1,6 +1,7 @@
 package spark
 
 import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.SparkContext._
 
 /**
  * Created by jiarui.yan on 5/29/15.

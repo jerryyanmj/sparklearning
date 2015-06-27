@@ -2,6 +2,7 @@ package streaming
 
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.streaming.StreamingContext._
 
 /**
  * Created by jiarui.yan on 5/29/15.
