@@ -36,75 +36,14 @@ class GeminiParsedMiddleTier(rawLog: GeminiRawMiddleTier) extends Serializable {
   def csMethod = raw.cs_method
 }
 
-class GeminiParsed(rawLog: GeminiRaw) extends Serializable {
+class GeminiParsed(rawLog: GeminiRaw) extends Serializable with GeminiParserHelper {
   val raw = rawLog
-
-  def parseRawValue(s: String) = Option(s).filter(x => !x.equals("-") && !x.equals("\"-\""))
-
-  def parseIntRawValue(f: String => Int)(s: String) = {
-    parseRawValue(s) match {
-      case Some(x) => Some(f(x))
-      case _ => None
-    }
-  }
-
-  def parseLongRawValue(f: String => Long)(s: String) = {
-    parseRawValue(s) match {
-      case Some(x) => Some(f(x))
-      case _ => None
-    }
-  }
-
-  def parseDatePartRawValue(f: (String, String) => String)(s: String, part: String) = {
-    parseRawValue(s) match {
-      case Some(x) => Some(f(x, part))
-      case _ => None
-    }
-  }
-
-  def datePartUtil(outFormat:String, dateStr: String) = {
-    val intFmt = DateTimeFormat.forPattern("dd/MMM/yyyy:HH:mm:ss Z")
-    val inDateTime = DateTime.parse(dateStr, intFmt)
-    DateTimeFormat.forPattern(outFormat).withZoneUTC().print(inDateTime)
-  }
 
   def clientIp = parseRawValue(raw.c_ip)
 
   def dateTime = parseRawValue(raw.date_string)
 
   def eventType = {
-    def isTest(s: String) = s.toLowerCase.contains("hls-lin-test")
-
-    def isGenres(s: String) = s.toLowerCase.contains("genres")
-
-    def isCrossDomain(s: String) = s.toLowerCase.contains("crossdomain.xml")
-
-    def isClientAccessPolicy(s: String) = s.toLowerCase.contains("clientaccesspolicy.xml")
-
-    def isBadReq(s: String) = s.toLowerCase.contains("BAD_REQUEST")
-
-    def isVideoChunk(s: String) = s.toLowerCase.contains(".ts") ||
-      s.toLowerCase.contains("Fragments(video".toLowerCase) ||
-      s.toLowerCase.contains("FragmentInfo(video".toLowerCase)
-
-    def isAudioChunk(s: String) = s.toLowerCase.contains("Fragments(audio".toLowerCase) ||
-      s.toLowerCase.contains("FragmentInfo(audio".toLowerCase)
-
-    def isEngAudioChunk(s: String) = s.toLowerCase.contains("Fragments(301_eng".toLowerCase) ||
-      s.toLowerCase.contains("FragmentInfo(301_eng".toLowerCase) ||
-      s.toLowerCase.contains("Fragments(302_eng".toLowerCase) ||
-      s.toLowerCase.contains("FragmentInfo(302_eng".toLowerCase)
-
-    def isTextChunk(s: String) = s.toLowerCase.contains("Fragments(textstream".toLowerCase) ||
-      s.toLowerCase.contains("FragmentInfo(textstream".toLowerCase)
-
-    def isManifestChunk(s: String) = s.toLowerCase.contains(".isml".toLowerCase) ||
-      s.toLowerCase.contains("isml/Manifest".toLowerCase) ||
-      s.toLowerCase.contains("ism/Manifest".toLowerCase)
-
-    def isManifest(s: String) = s.toLowerCase.contains(".m3u8")
-
-    def isKey(s: String) = s.toLowerCase.contains(".key")
 
     def chunkName(s: String) = s match {
       case csm if isAudioChunk(csm) => "AUDIO_CHUNK"
@@ -154,17 +93,17 @@ class GeminiParsed(rawLog: GeminiRaw) extends Serializable {
 
   def targetServer = parseRawValue(raw.event_type)
 
-  def year = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "yyyy")
+  def year = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "yyyy")
 
-  def month = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "MM")
+  def month = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "MM")
 
-  def day = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "dd")
+  def day = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "dd")
 
-  def hour = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "HH")
+  def hour = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "HH")
 
-  def minute = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "mm")
+  def minute = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "mm")
 
-  def second = parseDatePartRawValue(datePartUtil)(raw.date_string.substring(1, raw.date_string.length-1), "ss")
+  def second = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "ss")
 
   def utc = parseLongRawValue(x => x.toLong)(raw.unix_time)
 

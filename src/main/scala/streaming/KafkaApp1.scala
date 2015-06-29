@@ -1,6 +1,7 @@
 package streaming
 
 import model._
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
 import org.apache.spark.streaming.kafka._
@@ -47,31 +48,66 @@ object KafkaApp1 extends helper {
     //val decodedEvents = KafkaUtils.createDirectStream[String, GeminiRaw, StringDecoder, GeminiRawDecoder](ssc, kafkaParams, topics).map(_._2)
 
     val regularEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 18)
-    val parsedEvents = regularEvent map (lArr => new GeminiRaw(lArr)) map (gr => new GeminiParsed(gr))
+    val regularRawEvent = regularEvent map (lArr => new GeminiRaw(lArr))
+    val regularParsedEvents = regularRawEvent map (gr => new GeminiParsed(gr))
 
-    /**
-     * stream.foreachRDD((rdd: RDD[_], time: Time) => {
-      val count = rdd.count()
+    val logLineCountByEdge = regularParsedEvents.map(l => (l.sDns.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(rddInterval.toInt), Seconds(rddInterval.toInt))
+    logLineCountByEdge.foreachRDD((rdd: RDD[(String, Int)], time: Time) => {
       println("\n-------------------")
       println("Time: " + time)
       println("-------------------")
-      println("Received " + count + " events\n")
-      totalCount += count
+      println("Received " + rdd.count() + " events\n")
+      rdd.foreach(l => {
+        println("Edge node name " + l._1 + " received  " + l._2 + " events.")
+      })
+      val total = rdd.reduce((p1, p2) => ("Total", p1._2 + p2._2))
+      println("Total count " + total + " events.")
     })
-     */
-
-
-
-    parsedEvents.map(l => (l.sDns.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
-    parsedEvents map (l => (l.eventType.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
-    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
-    parsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
-    parsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), l.contentSize.getOrElse(0L))) reduceByKeyAndWindow (sumLong(x => x), Seconds(30), Seconds(10)) print()
+//    regularParsedEvents map (l => (l.eventType.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
+//    regularParsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
+//    regularParsedEvents map (l => (l.httpStatusCode.get, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
+//    regularParsedEvents map (l => (l.cacheDeliveryType.getOrElse("Unknown"), l.contentSize.getOrElse(0L))) reduceByKeyAndWindow (sumLong(x => x), Seconds(30), Seconds(10)) print()
 
     val midTierEvent = strEventStream map (l => l.split('\t')) filter (lArr => lArr.length == 10)
-    val parsedMidTierEvents = midTierEvent map (lArr => new GeminiRawMiddleTier(lArr)) map (l => new GeminiParsedMiddleTier(l))
+    val midTierRawEvent = midTierEvent map (lArr => new GeminiRawMiddleTier(lArr))
+    val midTierParsedEvents = midTierRawEvent map (l => new GeminiParsedMiddleTier(l))
 
-    parsedMidTierEvents.filter(l => l.csMethod.contains("CNN") && l.csMethod.contains(".ts")) map (l => (l.csMethod, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
+//    midTierParsedEvents.filter(l => l.csMethod.contains("CNN") && l.csMethod.contains(".ts")) map (l => (l.csMethod, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
+
+    regularRawEvent map (re => {
+
+      val userAgent = re.cs_user_agent
+      if (userAgent.contains("http_cli/0.4")) ("http_cli/0.4", 1)
+      else (userAgent, 1)
+
+    }) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) foreachRDD((rdd: RDD[(String, Int)], time: Time) => {
+      println("\n-------------------")
+      println("Time: " + time)
+      println("-------------------")
+      rdd.foreach(l => {
+        println("User Agent " + l._1 + " received  " + l._2 + " events.")
+      })
+      val total = rdd.reduce((p1, p2) => ("Total", p1._2 + p2._2))
+      println("Total count " + total + " events.")
+    })
+
+    midTierRawEvent map (re => {
+
+      val userAgent = re.cs_user_agent
+      if (userAgent.contains("http_cli/0.4")) ("http_cli/0.4", 1)
+      else (userAgent, 1)
+
+    }) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) foreachRDD((rdd: RDD[(String, Int)], time: Time) => {
+      println("\n-------------------")
+      println("Time: " + time)
+      println("-------------------")
+      rdd.foreach(l => {
+        println("User Agent " + l._1 + " received  " + l._2 + " events.")
+      })
+      val total = rdd.reduce((p1, p2) => ("Total", p1._2 + p2._2))
+      println("Total count " + total + " events.")
+    })
+
 
     ssc.start()
     ssc.awaitTermination()
