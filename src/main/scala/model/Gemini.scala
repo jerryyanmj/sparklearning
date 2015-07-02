@@ -107,7 +107,18 @@ class GeminiParsed(rawLog: GeminiRaw) extends Serializable with GeminiParserHelp
 
   def utc = parseLongRawValue(x => x.toLong)(raw.unix_time)
 
-  def mappedUserAgent = ???
+  def mappedUserAgent = Option(
+    raw.cs_user_agent match {
+    case cua if (cua.toLowerCase.indexOf("ipad") != -1) => "iPad"
+    case cua if (cua.toLowerCase.indexOf("roku") != -1) => "Roku"
+    case cua if (cua.toLowerCase.indexOf("ipod") != -1) => "iPod"
+    case cua if (cua.toLowerCase.indexOf("iphone") != -1) => "iPhone"
+    case cua if (cua.toLowerCase.indexOf("ios_other") != -1) => "ios_other"
+    case cua if (cua.toLowerCase.indexOf("android") != -1) => "Android"
+    case cua if (cua.toLowerCase.indexOf("online_video_portal") != -1) => "OVP"
+    case cua if (cua.toLowerCase.indexOf("samsung smart tv") != -1) => "Samsung Smart tv"
+    case _ => "Others"
+  })
 
   def cacheDeliveryType = parseRawValue(raw.s_cache_status)
 
@@ -150,7 +161,7 @@ class GeminiParsed(rawLog: GeminiRaw) extends Serializable with GeminiParserHelp
 
   def chunkType = raw.event_type match {
     case ct if ct.contains("linear") => Some("Linear")
-    case ct if ct.contains("video") != -1 => Some("Vod")
+    case ct if ct.contains("vod") != -1 => Some("Vod")
     case _ => None
   }
 

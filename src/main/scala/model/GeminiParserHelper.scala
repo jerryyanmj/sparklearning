@@ -70,4 +70,5 @@ trait GeminiParserHelper {
   def isManifest(s: String) = s.toLowerCase.contains(".m3u8")
 
   def isKey(s: String) = s.toLowerCase.contains(".key")
+
 }
