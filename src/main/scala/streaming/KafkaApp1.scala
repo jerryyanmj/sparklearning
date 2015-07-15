@@ -10,7 +10,7 @@ import org.apache.spark.SparkConf
 /**
  * Created by jiarui.yan on 5/29/15.
  *
- * ~/Works/tools/spark-1.1.0-bin-mapr3/bin/spark-submit \
+ * /Users/jiarui.yan/tools/spark-1.1.0-bin-mapr3/bin/spark-submit \
 --class "streaming.KafkaApp1" \
 --master local[2] \
 target/scala-2.10/sparklearning-assembly-1.0.jar \
@@ -51,7 +51,7 @@ object KafkaApp1 extends helper {
 
     val splittedRdd = strEventStream.map(rdd => rdd.split('\t'))
 
-    splittedRdd map(lArr => (lArr.length, 1)) reduceByKey((x, y) => x + y) print()
+    splittedRdd map(lArr => (lArr.length, 1)) reduceByKeyAndWindow (sumInt(x => x), Seconds(30), Seconds(10)) print()
     //splittedRdd.filter(lArr => lArr.length < 15).map(lArr => lArr.mkString("|")) print(5)
     //splittedRdd.filter(lArr => lArr.length > 15).map(lArr => lArr.mkString("|")) print(5)
 
