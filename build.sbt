@@ -26,3 +26,5 @@ resolvers += "Akka Repository" at "http://repo.akka.io/releases/"
 resolvers += "opennlp sourceforge repo" at "http://opennlp.sourceforge.net/maven2"
 
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/releases/"
+
+

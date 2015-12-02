@@ -105,7 +105,7 @@ class GeminiParsed(rawLog: GeminiRaw) extends Serializable with GeminiParserHelp
 
   def second = parseDatePartRawValue(datePartUtil)(dateStrExtractor(raw.date_string), "ss")
 
-  def utc = parseLongRawValue(x => x.toLong)(raw.unix_time)
+  def utc = parseLongRawValue(x => x.toDouble.toLong)(raw.unix_time)
 
   def mappedUserAgent = Option(
     raw.cs_user_agent match {
@@ -165,7 +165,7 @@ class GeminiParsed(rawLog: GeminiRaw) extends Serializable with GeminiParserHelp
     case _ => None
   }
 
-  def downloadTime = parseIntRawValue((x => x.toInt))(raw.download_speed)
+  def downloadTime = parseIntRawValue((x => x.toFloat.toInt))(raw.download_speed)
 
   def sessionId = ???
   def logSessionId = ???
