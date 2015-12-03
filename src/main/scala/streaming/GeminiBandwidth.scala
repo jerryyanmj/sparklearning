@@ -25,7 +25,7 @@ gemini-consumer \
 gemini_v02 \
 2 \
 10 \
-60 \
+120 \
 20
  *
  */
@@ -78,11 +78,42 @@ object GeminiBandwidth extends helper {
 
       println("\nTotal\t" + total._2._1 + "\t" + total._2._2 + "\t" + total._2._3 + "\t" + percentFormatter.format(efficiency) + "\t" + gbsFormatter.format(gbs) + "\t" + total._2._5 + "\t" + total._2._4 + "\t" + (total._2._4 - total._2._5))
 
-
-
-
-
     })
+
+    //regularParsedEvents map()
+
+    val bandwidth = regularParsedEvents map (l => {
+      if (l.downloadTime.getOrElse(0) <= 1 ) List((l.utc.getOrElse(0L), l.contentSize.getOrElse(0L).toDouble))
+      else {
+        (for {
+          i <- 0 until Math.ceil(l.downloadTime.getOrElse(0).toDouble).toInt
+          utc = l.utc.getOrElse(0L)
+          download = l.downloadTime.getOrElse(0)
+          if (utc != 0 && download != 0)
+          avg = l.contentSize.getOrElse(0L) * 8D / download
+          t = utc - i
+        } yield (t, avg)).toList
+      }
+    }) flatMap(x => x.toSeq) reduceByKeyAndWindow((x: Double,y: Double) => {x + y}, Seconds(windowSize), Seconds(slidingSize))
+
+
+    bandwidth.foreachRDD((rdd: RDD[(Long, Double)], time: Time) => {
+      println("\n-------------------")
+      println("Time: " + time + " " + new java.util.Date(time.milliseconds))
+      println("-------------------")
+
+      rdd.sortBy({case (ts, data) => data}, false).take(10).foreach({case (ts, data) =>
+
+        val bandwidth = data/(1024*1024*1024D)
+        val bandwidthFormatter = new DecimalFormat("###.##")
+
+        println("Bandwidth at\t" + ts + "\t" + data + "\t" + bandwidthFormatter.format(bandwidth))
+
+      })
+
+    });
+
+
 
     ssc.start()
     ssc.awaitTermination()
