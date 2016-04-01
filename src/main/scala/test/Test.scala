@@ -5,6 +5,8 @@ package test
  */
 class Test {
 
+  def isNumeric(input: String): Boolean = input.forall(c => c.isDigit || '.' == c || '+' == c || '-' == c)
+
   def main(args: Array[String]) {
     val x = for {
       a<- List.range(1,13)

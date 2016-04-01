@@ -30,6 +30,8 @@ trait GeminiParserHelper {
     }
   }
 
+  def isNumeric(input: String): Boolean = input.forall(_.isDigit)
+
   def dateStrExtractor(dateStr: String) = dateStr.substring(1, dateStr.length-1)
 
   def datePartUtil(outFormat:String, dateStr: String) = {

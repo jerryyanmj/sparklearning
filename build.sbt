@@ -2,14 +2,16 @@ name := "sparklearning"
 
 version := "1.0"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.10.5"
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-streaming" % "1.1.0",
   "org.apache.spark" %% "spark-streaming-kafka" % "1.1.0",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "redis.clients" % "jedis" % "2.7.2",
-  "org.apache.commons" % "commons-pool2" % "2.4.1"
+  "org.apache.commons" % "commons-pool2" % "2.4.1",
+  "org.apache.avro" % "avro" % "1.7.7",
+  "org.apache.avro" % "avro-mapred" % "1.7.7"
 )
 
 assemblyMergeStrategy in assembly := {
