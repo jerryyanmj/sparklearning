@@ -18,8 +18,6 @@ case class EGW(timestamp_received: Long, eventType: String, customerGUIDHash: St
 
 object SparkApp1 {
 
-
-
   def main (args: Array[String]): Unit = {
 
     val conf = new SparkConf()

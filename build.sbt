@@ -5,8 +5,8 @@ version := "1.0"
 scalaVersion := "2.10.5"
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-streaming" % "1.1.0",
-  "org.apache.spark" %% "spark-streaming-kafka" % "1.1.0",
+  "org.apache.spark" %% "spark-streaming" % "1.6.1",
+  "org.apache.spark" %% "spark-streaming-kafka" % "1.6.1",
   "com.github.nscala-time" %% "nscala-time" % "2.0.0",
   "redis.clients" % "jedis" % "2.7.2",
   "org.apache.commons" % "commons-pool2" % "2.4.1",
