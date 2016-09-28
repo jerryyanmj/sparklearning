@@ -1,9 +1,7 @@
-package model
+package model.cdn
 
 import kafka.serializer.Decoder
 import kafka.utils.VerifiableProperties
-import org.joda.time.DateTime
-import org.joda.time.format._
 
 /**
  * Created by jiarui.yan on 5/31/15.

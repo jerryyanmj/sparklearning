@@ -4,6 +4,7 @@ import java.text.DecimalFormat
 import java.util
 
 import model._
+import model.cdn.{GeminiParsed, GeminiRaw}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.StreamingContext._
@@ -16,17 +17,17 @@ import scala.util.matching.Regex
  * Created by jiarui.yan on 5/29/15.
  *
  * /Users/jiarui.yan/tools/spark-1.2.2-bin-cdh4/bin/spark-submit \
---class "streaming.GeminiBandwidth" \
---master local[2] \
-target/scala-2.10/sparklearning-assembly-1.0.jar \
-KafkaIntegrationTest \
-opstkcld-vm-kfa0001.conops.timewarnercable.com:2181,opstkcld-vm-kfa0002.conops.timewarnercable.com:2181,opstkcld-vm-kfa0003.conops.timewarnercable.com:2181 \
-gemini-consumer \
-gemini_v02 \
-2 \
-10 \
-120 \
-20
+*--class "streaming.GeminiBandwidth" \
+*--master local[2] \
+*target/scala-2.10/sparklearning-assembly-1.0.jar \
+*KafkaIntegrationTest \
+*opstkcld-vm-kfa0001.conops.timewarnercable.com:2181,opstkcld-vm-kfa0002.conops.timewarnercable.com:2181,opstkcld-vm-kfa0003.conops.timewarnercable.com:2181 \
+*gemini-consumer \
+*gemini_v02 \
+*2 \
+*10 \
+*120 \
+*20
  *
  */
 

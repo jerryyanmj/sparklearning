@@ -1,4 +1,4 @@
-package sparkworker
+package example.sparkworker
 
 import org.apache.spark.SparkContext
 

@@ -1,4 +1,4 @@
-package model
+package model.cdn
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
