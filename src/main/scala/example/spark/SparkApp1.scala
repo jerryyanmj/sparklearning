@@ -1,12 +1,7 @@
 package example.spark
 
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
-import org.apache.hadoop.io.NullWritable
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.SparkContext._
-
-import org.twc.eventgateway2.avro_refactored._
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.SparkSession
 
 /**
  * Created by jiarui.yan on 5/29/15.
@@ -20,14 +15,17 @@ object SparkApp1 {
 
   def main (args: Array[String]): Unit = {
 
-    val conf = new SparkConf()
-      .setMaster("local[2]")
-      .setAppName("My Spark App Test")
-      .set("spark.executor.memory", "1g")
-      .set("spark.rdd.compress", "true")
-      .set("spark.storage.memoryFraction", "1")
+    val filePath = args(0)
 
-    val sc = new SparkContext(conf)
+    val logFile = filePath // Should be some file on your system
+
+    val sc = new SparkContext(new SparkConf())
+
+    val logData = sc.textFile(logFile).cache()
+    val numAs = logData.filter(line => line.contains("a")).count()
+    val numBs = logData.filter(line => line.contains("b")).count()
+    println(s"Lines with a: $numAs, Lines with b: $numBs")
+    sc.stop()
 
 
 //    val rdd = sc.hadoopFile[AvroWrapper[enriched_event], NullWritable, AvroInputFormat[enriched_event]]("")
