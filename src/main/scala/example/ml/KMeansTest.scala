@@ -151,17 +151,17 @@ object KMeansTest {
 
     val rawData = sc.textFile(dataSrc)
 
-    clustering0(rawData)
+    //clustering0(rawData)
 
-    clustering1(rawData)
+    //clustering1(rawData)
 
-    clustering2(rawData)
+    //clustering2(rawData)
 
-    clustering3(rawData)
+    //clustering3(rawData)
 
     clustering4(rawData)
 
-    detectAnomalies(rawData)
+//    detectAnomalies(rawData)
 
     sc.stop()
 
@@ -265,6 +265,8 @@ object KMeansTest {
     val categorizer = categorizationAndLabelConstructor(rawData)
 
     val originalAndData = rawData.map(line => (line, categorizer(line)._2))
+
+//    originalAndData.take(5).foreach(println)
 
     val data = originalAndData.values
 

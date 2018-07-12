@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-sql" % sparkVersion,
   "org.apache.spark" %% "spark-mllib" % sparkVersion,
   "org.apache.spark" %% "spark-streaming-kafka-0-8" % sparkVersion,
+  "com.typesafe.play" %% "play-json" % "2.6.9" excludeAll (ExclusionRule(organization = "com.fasterxml.jackson.core"),ExclusionRule(organization = "com.fasterxml.jackson.datatype"), ExclusionRule(organization = "com.fasterxml.jackson.module")),
   "com.github.nscala-time" %% "nscala-time" % "2.0.0" excludeAll ExclusionRule(organization = "javax.servlet"),
   "org.apache.commons" % "commons-pool2" % "2.4.1" excludeAll ExclusionRule(organization = "javax.servlet"),
   "org.apache.avro" % "avro" % "1.7.7" excludeAll ExclusionRule(organization = "javax.servlet"),
