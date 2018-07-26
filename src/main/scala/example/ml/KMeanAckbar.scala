@@ -165,6 +165,7 @@ object KMeanAckbar {
     normalizedData.unpersist()
   }
 
+  // TODO: convert the count to percentage
 
 
   def checkTrapClustering2(rawData: RDD[String]) = {
@@ -334,7 +335,8 @@ object KMeanAckbar {
 
       vector.insertAll(0, vectorizedDeviceType)
       vector.insertAll(0, vectorizedMarket)
-      vector.insertAll(0, vectorizedError)
+      //vector.insertAll(0, vectorizedError)
+      vector.insertAll(0, vectorizedDevice)
 
       (label, Vectors.dense(vector.toArray))
 
