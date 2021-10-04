@@ -17,3 +17,4 @@ target/scala-2.10/sparklearning-assembly-1.0.jar \
 KafkaIntegrationTest dnvrco01-os-coe0002.conops.timewarnercable.com:9092 gemini_v01 10
 
 Test1
+Test2
